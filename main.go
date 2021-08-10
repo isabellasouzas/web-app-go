@@ -3,25 +3,25 @@ package main
 import (
 	"net/http"
 	"text/template"
-)
 
-type Produto struct {
-	Nome       string
-	Descricao  string
-	Preco      float64
-	Quantidade int
-}
+	"github/isabellasouzas/web-app-go/db"
+	"github/isabellasouzas/web-app-go/models"
+
+	_ "github.com/lib/pq"
+)
 
 var temp = template.Must(template.ParseGlob("templates/*.html"))
 
 func main() {
+	db := db.ConectaComBancoDeDados()
+	defer db.Close()
+
 	http.HandleFunc("/", index)
 	http.ListenAndServe(":8080", nil)
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	produtos := []Produto{{Nome: "Camiseta", Descricao: "amarela", Preco: 25, Quantidade: 3},
-		{"tenis", "corrida", 200, 2}}
+	todosOsProdutos := models.BuscaTodosOsProdutos()
+	temp.ExecuteTemplate(w, "Index", todosOsProdutos)
 
-	temp.ExecuteTemplate(w, "Index", produtos)
 }
